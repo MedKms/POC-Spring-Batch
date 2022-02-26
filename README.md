@@ -19,6 +19,9 @@ Il permet de pallier à des problème récurrents lors de développement de batc
     2. ItemProcessor : c'est le composant responsable de la transformation des données lues. C'est en son sein que toutes les règles de gestion sont implémentées .
     3. ItemWriter : ce composant sauvegarde les données transformées par le processor dans un ou plusieurs conteneurs désirés (bases de données, fichiers plats (csv, xml, xls, etc.), cloud).
  - JobRepository : c'est le composant chargé d'enregistrer les statistiques issues du monitoring sur le JobLauncher, le Job et la (ou les) Step à chaque exécution. Il offre deux techniques possibles pour stocker ces statistiques : le passage par une base de données ou le passage par une Map. Lorsque le stockage des statistiques est fait dans une base de données, et donc persisté de façon durable, cela permet le suivi continuel du Batch dans le temps à l'effet d'analyser les éventuels problèmes en cas d'échec. A contrario lorsque c'est dans une Map, les statistiques persistées seront perdues à la terminaison de chaque instance d'exécution du Batch. Dans tous les cas, il faut configurer l'un ou l'autre obligatoirement.
+ - 
+###Spring Batch Configuration
+
 ```java
 @Configuration
 @EnableBatchProcessing
