@@ -19,3 +19,60 @@ Il permet de pallier à des problème récurrents lors de développement de batc
     2. ItemProcessor : c'est le composant responsable de la transformation des données lues. C'est en son sein que toutes les règles de gestion sont implémentées .
     3. ItemWriter : ce composant sauvegarde les données transformées par le processor dans un ou plusieurs conteneurs désirés (bases de données, fichiers plats (csv, xml, xls, etc.), cloud).
  - JobRepository : c'est le composant chargé d'enregistrer les statistiques issues du monitoring sur le JobLauncher, le Job et la (ou les) Step à chaque exécution. Il offre deux techniques possibles pour stocker ces statistiques : le passage par une base de données ou le passage par une Map. Lorsque le stockage des statistiques est fait dans une base de données, et donc persisté de façon durable, cela permet le suivi continuel du Batch dans le temps à l'effet d'analyser les éventuels problèmes en cas d'échec. A contrario lorsque c'est dans une Map, les statistiques persistées seront perdues à la terminaison de chaque instance d'exécution du Batch. Dans tous les cas, il faut configurer l'un ou l'autre obligatoirement.
+```java
+@Configuration
+@EnableBatchProcessing
+public class SpringBatchConfig {
+
+    private static final String STEP_NAME="myStep";
+    private static final String JOB_NAME="myJob";
+    private static final String FLAT_FILE_NAME="flatFileItemReader";
+
+    @Value("${line.delimiter}")
+    private String delimiter;
+
+
+    @Autowired private JobBuilderFactory jobBuilderFactory;
+    @Autowired private StepBuilderFactory stepBuilderFactory;
+    @Autowired private ItemReader<Student> studentItemReader;
+    @Autowired private ItemWriter<Student> studentItemWriter;
+    @Autowired private ItemProcessor<Student,Student> studentItemProcessor;
+
+    @Bean
+    public Job studentJob(){
+        Step step=stepBuilderFactory.get(STEP_NAME)
+                .<Student,Student>chunk(5)
+                .reader(studentItemReader)
+                .processor(studentItemProcessor)
+                .writer(studentItemWriter)
+                .build();
+        return jobBuilderFactory.get(JOB_NAME)
+                .start(step).build();
+    }
+
+    @Bean
+    public FlatFileItemReader<Student> fileItemReader(@Value("${inputFile}") Resource inputFile){
+        FlatFileItemReader<Student> fileItemReader=new FlatFileItemReader<>();
+        fileItemReader.setName(FLAT_FILE_NAME);
+        fileItemReader.setLinesToSkip(1);
+        fileItemReader.setResource(inputFile);
+        fileItemReader.setLineMapper(lineMapper());
+        return fileItemReader;
+
+    }
+    @Bean
+    public LineMapper<Student> lineMapper() {
+        DefaultLineMapper<Student> lineMapper=new DefaultLineMapper<>();
+        DelimitedLineTokenizer lineTokenizer=new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(delimiter);
+        lineTokenizer.setStrict(false);
+        lineTokenizer.setNames("id","firstName","lastName","email","age");
+        lineMapper.setLineTokenizer(lineTokenizer);
+        BeanWrapperFieldSetMapper<Student> fieldSetMapper=new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper.setTargetType(Student.class);
+        lineMapper.setFieldSetMapper(fieldSetMapper);
+        return lineMapper;
+    }
+
+}
+```
