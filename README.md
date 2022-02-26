@@ -79,3 +79,9 @@ public class SpringBatchConfig {
 
 }
 ```
+
+#### csv file(input)
+<img width="382" alt="data" src="https://user-images.githubusercontent.com/56096031/155855381-6507df9d-b3ba-4787-a721-6835a3e79304.PNG">
+
+### output 
+<img width="541" alt="output" src="https://user-images.githubusercontent.com/56096031/155855435-d527587a-f02e-4166-8385-c815ec67e850.PNG">
